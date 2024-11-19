@@ -9,6 +9,7 @@ for (file in list.files("data/sra-metadata", full.names = TRUE)) {
   assign(x = filename, value = readr::read_csv(file))
 }
 
+
 accessions <- purrr::map(vars,
                          ~  {
                            data <- eval(parse(text = .x))
@@ -43,24 +44,24 @@ getTrimmomaticCall <- function(BioProject, Run, LibraryLayout, outdir) {
   if (LibraryLayout == "PAIRED") {
 
     expression <- glue::glue(
-      'java -jar ../software/Trimmomatic-0.39/trimmomatic-0.39.jar PE \\
+      'java -jar software/Trimmomatic-0.39/trimmomatic-0.39.jar PE \\
                   	-threads 8 \\
                   	-trimlog {outdir}/trimlog/{Run}_trimlog.txt \\
                   	-baseout {outdir}/{Run}_trim.fastq \\
                   	data/{BioProject}/rawdata/{Run}_1.fastq data/{BioProject}/rawdata/{Run}_2.fastq \\
-                  	ILLUMINACLIP:../software/Trimmomatic-0.39/adapters/TruSeq3-PE.fa:2:30:10 \\
+                  	ILLUMINACLIP:software/Trimmomatic-0.39/adapters/TruSeq3-PE.fa:2:30:10 \\
                   	LEADING:3 TRAILING:3 SLIDINGWINDOW:4:20 MINLEN:50')
   } else {
 
     if (LibraryLayout == "SINGLE") {
 
       expression <- glue::glue('
-                    java -jar software/Trimmomatic-0.39/Trimmomatic-0.39.jar SE \\
+                    java -jar software/Trimmomatic-0.39/trimmomatic-0.39.jar SE \\
                     -threads 8 \\
                     -trimlog {outdir}/trimlog/{Run}_trimlog.txt \\
-                    data/rawdata/{Run}.fastq \\
+                    data/{BioProject}/rawdata/{Run}.fastq \\
                     {outdir}/{Run}_trim.fastq \\
-                    ILLUMINACLIP:../software/Trimmomatic-0.39/adapters/TruSeq3-SE.fa:2:30:6 \\
+                    ILLUMINACLIP:software/Trimmomatic-0.39/adapters/TruSeq3-SE.fa:2:30:6 \\
                     LEADING:3 TRAILING:3 SLIDINGWINDOW:4:20 MINLEN:40')
 
     } else {
@@ -72,16 +73,18 @@ getTrimmomaticCall <- function(BioProject, Run, LibraryLayout, outdir) {
   return(expression)
 }
 
-getRSEMCall <- function(BioProject, Run, LibraryLayout, outDir, rsemReference = "software/rsem/kt2440") {
+
+# Defines a function to run RSEM
+getRSEMCall <- function(BioProject, Run, LibraryLayout, outDir, rsemReference) {
 
   if (LibraryLayout == "SINGLE") {
 
     message("running rsem-calculate-expression in single end mode")
 
-    call <- glue::glue("rsem-calculate-expression --bowtie2 --no-bam-output --num-threads 8 \
-    data/{BioProject}/trimmed/{Run}_trim.fastq \
-    {rsemReference} \
-    {outdir}/{Run}")
+    call <- glue::glue("rsem-calculate-expression --bowtie2 --no-bam-output --num-threads 8 \\
+    data/{BioProject}/trimmed/{Run}_trim.fastq \\
+    {rsemReference} \\
+    {outDir}/{Run}")
 
   } else {
     if (LibraryLayout == "PAIRED") {
@@ -89,10 +92,10 @@ getRSEMCall <- function(BioProject, Run, LibraryLayout, outDir, rsemReference = 
       message("running rsem-calculate-expression in paired end mode")
 
       call <- glue::glue(
-      "rsem-calculate-expression --bowtie2 --no-bam-output --num-threads 8 --paired-end \
-       data/{BioProject}/trimmed/{Run}_trim_1P.fastq data/{BioProject}/trimmed/{Run}_trim_2P.fastq \
-       {rsemReference} \
-       {outdir}/{Run}"
+      "rsem-calculate-expression --bowtie2 --no-bam-output --num-threads 8 --paired-end \\
+       data/{BioProject}/trimmed/{Run}_trim_1P.fastq data/{BioProject}/trimmed/{Run}_trim_2P.fastq \\
+       {rsemReference} \\
+       {outDir}/{Run}"
       )
 
     } else {
@@ -103,6 +106,7 @@ getRSEMCall <- function(BioProject, Run, LibraryLayout, outDir, rsemReference = 
 
   return(call)
 }
+
 
 # Defines helper functions for dealing with DESeq2
 
@@ -149,13 +153,13 @@ runTxi <- function(metadata, dataset, prefix = "rsem/genbank") {
   files <- c()
   dl_files <- list.files(glue::glue("{prefix}/{dataset}"), full.names = TRUE, pattern = glue::glue(".genes.results"))
 
- for (run in unique(md$Run)) {
+  for (run in unique(md$Run)) {
     filename <- glue::glue("{prefix}/{dataset}/{run}.genes.results")
     if( filename %in% dl_files) {
       names(filename) <- run
       files <- append(files, filename)
     }
- }
+  }
 
   txi.rsem <- tximport::tximport(files, type = "rsem", txIn = FALSE, txOut = FALSE)
 
@@ -185,7 +189,7 @@ runTxi <- function(metadata, dataset, prefix = "rsem/genbank") {
     dplyr::pull(Run)
 
   if(length(zeroCountSamples) > 0) {
-  message(glue::glue("Runs {stringr::str_flatten_comma(zeroCountSamples, last = ' and ')} are constant, zero-count runs. Removing for DESeq2 compatibility..."))
+    message(glue::glue("Runs {stringr::str_flatten_comma(zeroCountSamples, last = ' and ')} are constant, zero-count runs. Removing for DESeq2 compatibility..."))
 
     colnames <- colnames(txi.rsem$counts)
 
@@ -223,12 +227,12 @@ getDESeqResults <- function(ddsTxi, dataset, comparisons) {
 readGEOmetadata <- function(series_matrix_path) {
 
   output <- readr::read_lines(series_matrix_path) |>
-              stringr::str_subset(pattern = "\\!Sample_geo_accession|\\!Sample_description") |>
-              stringr::str_remove_all(pattern = '\\"') |>
-              stringr::str_remove_all(pattern = "!") |>
-              stringr::str_split(pattern = "\\t|' '") |>
-              dplyr::bind_cols() |>
-              janitor::row_to_names(1)
+    stringr::str_subset(pattern = "\\!Sample_geo_accession|\\!Sample_description") |>
+    stringr::str_remove_all(pattern = '\\"') |>
+    stringr::str_remove_all(pattern = "!") |>
+    stringr::str_split(pattern = "\\t|' '") |>
+    dplyr::bind_cols() |>
+    janitor::row_to_names(1)
 
   return(output)
 
