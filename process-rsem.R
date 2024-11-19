@@ -1,4 +1,4 @@
-source("utils.R")
+source("utils - with metadata functions.R")
 
 data <- list()
 datasets <- kt2440 |> dplyr::pull(BioProject) |> unique()
@@ -7,7 +7,7 @@ datasets <- kt2440 |> dplyr::pull(BioProject) |> unique()
 dataset <- datasets[1]
 metadata <- prepareMetadata(get(dataset),makeConditionsFrom = c("stress","time_point"), na.value = "0 min")
 
-order <- c("none_0 min", "NaCl_7 min", "NaCl_60 min", "Imipenem_7 min", "Imipenem_60 min", "H2O2_7 min", "H2O2_60 min")
+order <- c("none_0_min", "nacl_7_min", "nacl_60_min", "imipenem_7_min", "imipenem_60_min", "h2o2_7_min", "h2o2_60_min")
 
 data <- append(data, list(list(dataset = dataset, metadata = metadata, conditionorder = order)))
 
@@ -23,7 +23,7 @@ data <- append(data, list(list(dataset = dataset, metadata = metadata, condition
 dataset <- datasets[3]
 metadata <- prepareMetadata(get(dataset), makeConditionsFrom = "Library Name") |>
   dplyr::mutate(Condition = stringr::str_extract(Condition, "^.{2}"))
-order <- c("CK", "LS", "IS", "HS")
+order <- c("ck", "ls", "is", "hs")
 
 data <- append(data, list(list(dataset = dataset, metadata = metadata, conditionorder = order)))
 
@@ -63,18 +63,19 @@ order <- c("s_0min", "s_15min", "p1_15min", "p3_15min", "p5_15min", "s_1h", "s_3
 data <- append(data, list(list(dataset = dataset, metadata = metadata, conditionorder = order)))
 
 
-# PRJNA630234 ----
-dataset <- datasets[7]
-metadata <- prepareMetadata(get(dataset), makeConditionsFrom = "growth")|>
-  dplyr::mutate(Condition = stringr::str_remove_all(Condition, "(in the )|(supplemented with)|( M9)|(\\d{1}.+g/L)"),
-                Condition = stringr::str_squish(Condition))
-  order <- c("glucose", "glucose_triethanolamine_acetate", "glucose_triethylamine_hydrogen_sulfate", "glucose_acetate")
-conditionOrder(metadata) <- order
+# PRJNA630234 ---- <- come back to this one
+# this dataset has no counts?? gotta investigate what happened
+# dataset <- datasets[7]
+# metadata <- prepareMetadata(get(dataset), makeConditionsFrom = "growth")|>
+#   dplyr::mutate(Condition = stringr::str_remove_all(Condition, "(in_the_)|(supplemented_with)|(_m9)|(__\\d{1}.+g/L)"),
+#                 Condition = stringr::str_squish(Condition))
+#   order <- c("glucose", "glucose_triethanolamine_acetate", "glucose_triethylamine_hydrogen_sulfate", "glucose_acetate")
+# conditionOrder(metadata) <- order
+#
+# data <- append(data, list(list(dataset = dataset, metadata = metadata, conditionorder = order)))
+#
 
-data <- append(data, list(list(dataset = dataset, metadata = metadata, conditionorder = order)))
-
-
-# PRJNA796354 ----  <- will come back to this one later
+# PRJNA796354 ----
 dataset <- datasets[8]
 
 # since this dataset does not include the sample conditions in the metadata
@@ -113,37 +114,25 @@ data <- append(data, list(list(dataset = dataset, metadata = metadata, condition
 dataset <- datasets[9]
 metadata <- prepareMetadata(get(dataset), makeConditionsFrom = "condition") |>
   dplyr::mutate(Condition = stringr::str_replace(Condition, " \\+ ", "_"))
-order <- c("LB", "LB_selenite")
+order <- c("lb", "lb_selenite")
 
 data <- append(data, list(list(dataset = dataset, metadata = metadata, conditionorder = order)))
 
+# running deseq2
 
-all_deseq2 <- NULL
-#
-# for (ds in unique(data$dataset)) {
-#   tempdata <- dplyr::filter(data, dataset == ds)
-#   tempmeta <- tempdata$metadata
-#   order <- tempdata$order
-#
-#   conditionOrder(tempmeta) <- order
-#
-#
-#   # obtaining DESeq2 results...
-#   txi <- runTxi(tempmeta, dataset = ds)
-#
-#   tempmeta <- tempmeta |> dplyr::filter(Run %in% colnames(txi$counts))
-#
-#   # calling DESeq2 on the tximport object
-#   ddsTxi <- DESeq2::DESeqDataSetFromTximport(txi, colData = tempmeta, design = ~ Condition) |>
-#             DESeq2::DESeq()
-#
-#   all_comparisons <- data.frame(factorName = "Condition",
-#                                 numeratorLevel = levels(tempmeta$Condition)[-1],
-#                                 denominatorLevel = levels(tempmeta$Condition)[1])
-#
-#   res <- getDESeqResults(ddsTxi, ds, comparisons = all_comparisons)
-#
-#   dplyr::bind_rows(all_deseq2, res)
-# }
-#
-#
+genbank_rnaseq <- purrr::map(data, ~ processRNAseq(.x, folder.prefix = "rsem/genbank"))
+refseq_rnaseq <- purrr::map(data, ~ processRNAseq(.x, folder.prefix = "rsem/refseq"))
+
+
+
+unique(genbank_rnaseq[[8]]$condition)
+a <- genbank_rnaseq[[8]] |> dplyr::filter(condition == "lb_selenite")
+b <- refseq_rnaseq[[8]] |> dplyr::filter(condition == "lb_selenite")
+
+joined <- dplyr::inner_join(a, b, by = "transcript")
+
+
+library(ggplot2)
+ggplot(joined, aes(x = baseMean.x, y = baseMean.y)) +
+  geom_point() +
+  theme_light()

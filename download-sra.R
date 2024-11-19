@@ -1,6 +1,39 @@
 #!/usr/bin/env Rscript
 
-source("import-metadata.R")
+# opens all metadata tables
+vars <- c()
+
+for (file in list.files("data/sra-metadata", full.names = TRUE)) {
+  filename <- stringr::str_extract(file, "(?<=metadata\\/).+(?=.txt)")
+  vars <- append(vars, filename)
+  assign(x = filename, value = readr::read_csv(file))
+}
+
+
+
+accessions <- purrr::map(vars,
+           ~  {
+             data <- eval(parse(text = .x))
+
+             runs <- data |> dplyr::select(BioProject, Organism, Run)
+
+             if ("genotype" %in% colnames(data)) {
+               runs$genotype <- data$genotype
+             }
+             if ("strain" %in% colnames(data)) {
+               runs$genotype <- data$strain
+             }
+
+             return(runs)
+           }
+           ) |> purrr::list_rbind()
+
+kt2440 <- accessions |>
+  dplyr::filter(dplyr::if_else(is.na(genotype),
+                               stringr::str_ends(Organism, "KT2440"),
+                               genotype %in% c("KT2440", "wild type", "KT2440 wildtype")))
+
+suffixes <- c(".fastq","_1.fastq", "_2.fastq")
 
 for (i in 1:nrow(kt2440)) {
 

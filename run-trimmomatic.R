@@ -26,5 +26,5 @@ for (i in 1:nrow(kt2440)) {
 
   # trimmomatic function call
   call <- getTrimmomaticCall(BioProject = BioProject, Run = Run, LibraryLayout = LibraryLayout, outdir = outdir)
-  message(call)
+  system(call)
 }
