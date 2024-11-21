@@ -4,14 +4,14 @@ source("utils.R")
 
 # please activate rsem virtual environment before running this script!
 
-# checks if the reference rsem files exist, if not create them
+# # checks if the reference rsem files exist, if not create them
 # if (!file.exists("software/rsem/refseq.1.bt2")){
 #   system("rsem-prepare-reference --bowtie2 software/GCF_000007565.2_ASM756v2_cds_from_genomic.fna software/rsem/refseq")
 # }
 # if (!file.exists("software/rsem/genbank.1.bt2")){
 #   system("rsem-prepare-reference --bowtie2 software/GCA_000007565.2_ASM756v2_cds_from_genomic.fna software/rsem/genbank")
 # }
-#
+# #
 
 prefixes <- c("genbank", "refseq")
 

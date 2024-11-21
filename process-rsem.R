@@ -123,16 +123,16 @@ data <- append(data, list(list(dataset = dataset, metadata = metadata, condition
 genbank_rnaseq <- purrr::map(data, ~ processRNAseq(.x, folder.prefix = "rsem/genbank"))
 refseq_rnaseq <- purrr::map(data, ~ processRNAseq(.x, folder.prefix = "rsem/refseq"))
 
-
-
-unique(genbank_rnaseq[[8]]$condition)
-a <- genbank_rnaseq[[8]] |> dplyr::filter(condition == "lb_selenite")
-b <- refseq_rnaseq[[8]] |> dplyr::filter(condition == "lb_selenite")
-
-joined <- dplyr::inner_join(a, b, by = "transcript")
-
-
-library(ggplot2)
-ggplot(joined, aes(x = baseMean.x, y = baseMean.y)) +
-  geom_point() +
-  theme_light()
+#
+#
+# unique(genbank_rnaseq[[8]]$condition)
+# a <- genbank_rnaseq[[8]] |> dplyr::filter(condition == "lb_selenite")
+# b <- refseq_rnaseq[[8]] |> dplyr::filter(condition == "lb_selenite")
+#
+# joined <- dplyr::inner_join(a, b, by = "transcript")
+#
+#
+# library(ggplot2)
+# ggplot(joined, aes(x = baseMean.x, y = baseMean.y)) +
+#   geom_point() +
+#   theme_light()
