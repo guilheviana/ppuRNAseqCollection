@@ -1,4 +1,6 @@
-Unable to read file magic number
-Unable to read file magic number
-0 reads
-0.00% overall alignment rate
+11887788 reads; of these:
+  11887788 (100.00%) were paired; of these:
+    6837662 (57.52%) aligned concordantly 0 times
+    4747513 (39.94%) aligned concordantly exactly 1 time
+    302613 (2.55%) aligned concordantly >1 times
+42.48% overall alignment rate

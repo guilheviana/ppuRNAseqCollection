@@ -35,7 +35,6 @@ kt2440 <- accessions |>
 suffixes <- c(".fastq","_1.fastq", "_2.fastq")
 
 # Defines a function to trim reads using Trimmomatic
-
 getTrimmomaticCall <- function(BioProject, Run, LibraryLayout, outdir) {
 
   message(glue::glue("Generating Trimmomatic call for {Run} in Bioproject {BioProject}\n The library layout is {LibraryLayout}"))
@@ -72,8 +71,6 @@ getTrimmomaticCall <- function(BioProject, Run, LibraryLayout, outdir) {
 
   return(expression)
 }
-
-
 # Defines a function to run RSEM
 getRSEMCall <- function(BioProject, Run, LibraryLayout, outDir, rsemReference) {
 
@@ -106,11 +103,7 @@ getRSEMCall <- function(BioProject, Run, LibraryLayout, outDir, rsemReference) {
 
   return(call)
 }
-
-
 # Defines helper functions for dealing with DESeq2
-
-
 prepareMetadata <- function(metadataTable, makeConditionsFrom = NULL, na.value = "") {
 
   if(is.null(makeConditionsFrom)) {
@@ -139,13 +132,11 @@ prepareMetadata <- function(metadataTable, makeConditionsFrom = NULL, na.value =
 
   return(out)
 }
-
 `conditionOrder<-` <- function(preparedMetadata, value) {
   levels(preparedMetadata[["Condition"]]) <- value
 
   preparedMetadata
 }
-
 runTxi <- function(metadata, dataset, prefix = "rsem/genbank") {
 
   md <- metadata
@@ -201,7 +192,6 @@ runTxi <- function(metadata, dataset, prefix = "rsem/genbank") {
   return(txi.rsem)
 
 }
-
 getDESeqResults <- function(ddsTxi, dataset, comparisons) {
 
   out <- NULL
@@ -223,7 +213,6 @@ getDESeqResults <- function(ddsTxi, dataset, comparisons) {
 
   return(out)
 }
-
 readGEOmetadata <- function(series_matrix_path) {
 
   output <- readr::read_lines(series_matrix_path) |>
@@ -237,7 +226,6 @@ readGEOmetadata <- function(series_matrix_path) {
   return(output)
 
 }
-
 processRNAseq <- function(data, folder.prefix = "rsem/genbank") {
   tempdataname <- data$dataset
   tempmeta <- data$metadata

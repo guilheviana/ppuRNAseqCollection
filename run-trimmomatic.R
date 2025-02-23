@@ -6,6 +6,7 @@
 
 # In a very rare case (PRJNA450701) there are paired-end and single-end reads in the same
 # run, without this difference being specified in the bioproject metadata file
+# This script decides how to run the script in a per-sample basis
 source("utils.R")
 
 for (i in 1:nrow(kt2440)) {

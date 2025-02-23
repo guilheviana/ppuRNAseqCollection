@@ -1,4 +1,5 @@
 source("utils.R")
+source("prepare-loci-info.R")
 
 data <- list()
 datasets <- kt2440 |> dplyr::pull(BioProject) |> unique()
@@ -63,17 +64,18 @@ order <- c("s_0min", "s_15min", "p1_15min", "p3_15min", "p5_15min", "s_1h", "s_3
 data <- append(data, list(list(dataset = dataset, metadata = metadata, conditionorder = order)))
 
 
-# PRJNA630234 ---- <- come back to this one
-# this dataset has no counts?? gotta investigate what happened
-# dataset <- datasets[7]
-# metadata <- prepareMetadata(get(dataset), makeConditionsFrom = "growth")|>
-#   dplyr::mutate(Condition = stringr::str_remove_all(Condition, "(in_the_)|(supplemented_with)|(_m9)|(__\\d{1}.+g/L)"),
-#                 Condition = stringr::str_squish(Condition))
-#   order <- c("glucose", "glucose_triethanolamine_acetate", "glucose_triethylamine_hydrogen_sulfate", "glucose_acetate")
-# conditionOrder(metadata) <- order
-#
-# data <- append(data, list(list(dataset = dataset, metadata = metadata, conditionorder = order)))
-#
+# PRJNA630234 ----
+
+dataset <- datasets[7]
+metadata <- prepareMetadata(get(dataset), makeConditionsFrom = "growth")|>
+  dplyr::mutate(
+    Condition = stringr::str_remove_all(Condition,"(in_the_)|(supplemented_with_)|(_m9)|(\\d{1}.*g/l_)"),
+    Condition = stringr::str_squish(Condition))
+  order <- c("glucose", "glucose_triethanolamine_acetate", "glucose_triethylamine_hydrogen_sulfate", "glucose_acetate")
+conditionOrder(metadata) <- order
+
+data <- append(data, list(list(dataset = dataset, metadata = metadata, conditionorder = order)))
+
 
 # PRJNA796354 ----
 dataset <- datasets[8]
@@ -121,18 +123,46 @@ data <- append(data, list(list(dataset = dataset, metadata = metadata, condition
 # running deseq2
 
 genbank_rnaseq <- purrr::map(data, ~ processRNAseq(.x, folder.prefix = "rsem/genbank"))
+
+genbank_processed <- genbank_rnaseq |>
+  dplyr::bind_rows() |>
+  dplyr::left_join(genbank_lookup)
+
 refseq_rnaseq <- purrr::map(data, ~ processRNAseq(.x, folder.prefix = "rsem/refseq"))
 
-#
-#
-# unique(genbank_rnaseq[[8]]$condition)
-# a <- genbank_rnaseq[[8]] |> dplyr::filter(condition == "lb_selenite")
-# b <- refseq_rnaseq[[8]] |> dplyr::filter(condition == "lb_selenite")
-#
-# joined <- dplyr::inner_join(a, b, by = "transcript")
-#
-#
-# library(ggplot2)
-# ggplot(joined, aes(x = baseMean.x, y = baseMean.y)) +
-#   geom_point() +
-#   theme_light()
+refseq_processed <- refseq_rnaseq |>
+  dplyr::bind_rows() |>
+  dplyr::left_join(refseq_lookup, relationship = "many-to-many")
+
+# saving output files
+unique_conditions <- dplyr::bind_rows(genbank_processed, refseq_processed) |>
+  dplyr::select(condition) |>
+  dplyr::distinct()
+
+dir.create("./output/")
+if (!file.exists("./output/unique_conditions.tsv")) readr::write_tsv(unique_conditions, file = "./output/unique_conditions.tsv")
+
+if (file.exists("./output/unique_conditions_MANUALFORMATTED.csv")) {
+  # get the formatted conditions table (manually curated)
+  cond_format <- readr::read_tsv("output/unique_conditions_MANUALFORMATTED.csv")
+
+  genbank_processed <- genbank_processed |>
+    dplyr::left_join(cond_format) |>
+    dplyr::relocate(dataset, condition_formatted, locus_tag, baseMean, log2FoldChange,
+                    lfcSE, stat, pvalue, padj, condition, control, transcript, Source)
+
+  readr::write_tsv(genbank_processed, "../output/tables/genbank_rnaseq.tsv")
+  saveRDS(genbank_processed, "genbank_processed.RDS")
+
+  refseq_processed <- refseq_processed |>
+    dplyr::left_join(cond_format) |>
+    dplyr::relocate(dataset, condition_formatted, new_locus_tag, old_locus_tag, baseMean, log2FoldChange,
+                    lfcSE, stat, pvalue, padj, condition, control, transcript, Source)
+
+  readr::write_tsv(refseq_processed, "../output/tables/refseq_rnaseq.tsv")
+  saveRDS(refseq_processed, "refseq_processed.RDS")
+
+} else {
+  message("manually formated condition names not found. Exiting...")
+  break()
+}

@@ -1,0 +1,39 @@
+condition	condition_formatted
+nacl_7_min	NaCl (7 min)
+nacl_60_min	NaCl (60 min)
+imipenem_7_min	Imipenem (7 min)
+imipenem_60_min	Imipenem (60 min)
+h2o2_7_min	H2O2 (7 min)
+h2o2_60_min	H2O2 (60 min)
+toluene_vapor_phase	Toluene (vapor phase)
+toluene_shock	Toluene (shock)
+ls	Zinc (0.2 mM)
+is	Zinc (1.5 mM)
+hs	Zinc (2.5mM)
+myristic_acid	Myristic acid
+citrate	Citrate
+ferulic_acid	Ferulic acid
+serine	Serine
+s_15min	Nutrient-limited bioreactor port ‘S’ (15 min)
+p1_15min	Nutrient-limited bioreactor port ‘P1’ (15 min)
+p3_15min	Nutrient-limited bioreactor port ‘P3’ (15 min)
+p5_15min	Nutrient-limited bioreactor port ‘P5’ (15 min)
+s_1h	Nutrient-limited bioreactor port ‘S’  (1 h)
+s_3h	Nutrient-limited bioreactor port ‘S’  (3 h)
+s_9h	Nutrient-limited bioreactor port ‘S’  (9 h)
+s_25h	Nutrient-limited bioreactor port ‘S’  (25h)
+p1_25h	Nutrient-limited bioreactor port ‘P1’ (25 h)
+p3_25h	Nutrient-limited bioreactor port ‘P3’ (25 h)
+p5_25h	Nutrient-limited bioreactor port ‘P5’ (25 h)
+glucose_triethanolamine_acetate	Triethanolamine acetate
+glucose_triethylamine_hydrogen_sulfate	Triethylamine hydrogen sulfate
+glucose_acetate	Glucose and acetate
+gluconate	Gluconate
+fructose	Fructose
+ferulate	Ferulate
+coumarate	Coumarate
+glucose_gluconate	Glucose and Gluconate
+fructose_glucose	Fructose and Glucose
+coumarate_ferulate	Coumarate and Ferulate
+fructose_glucose_gluconate	Fructose, Glucose and Gluconate
+lb_selenite	Selenite (LB)

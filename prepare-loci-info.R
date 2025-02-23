@@ -15,9 +15,17 @@ locus_tag = stringr::str_extract(genbank_fa, "(?<=locus_tag=).+?(?=])")
 refseq_fa <- read.delim("GCF_000007565.2_ASM756v2_cds_from_genomic.fna.gz", FALSE) |>
   dplyr::filter(stringr::str_starts(V1, pattern = ">")) |> tibble::deframe()
 
+# we also need to convert between old/new loci for refseq
+# using data from elsewhere in the project
+annottable <- readr::read_delim("data/refseq.tsv") |>
+  dplyr::select(locus_tag, old_locus_tag)
+
 refseq_lookup <- tibble::tibble(
-  og_name = stringr::str_extract(refseq_fa, "(?<=>).*?(?=\\s)"),
-  locus_tag = stringr::str_extract(refseq_fa, "(?<=locus_tag=).+?(?=])"),
+  transcript = stringr::str_extract(refseq_fa, "(?<=>).*?(?=\\s)"),
+  new_locus_tag = stringr::str_extract(refseq_fa, "(?<=locus_tag=).+?(?=])"),
   protein_id = stringr::str_extract(refseq_fa, "(?<=protein_id=).+?(?=])")
 ) |>
-  dplyr::mutate(new_name = stringr::str_replace(og_name, protein_id, locus_tag))
+  dplyr::left_join(annottable, by = c("new_locus_tag" = "locus_tag"))
+
+
+
