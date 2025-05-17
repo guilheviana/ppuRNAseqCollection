@@ -11,7 +11,7 @@ This analysis is part of an upcoming publication comparing the usage of differen
 
 ### Scripts and data
 
-- `affected_newformat` and `affected_oldformat` are R vectors, stored as binary files, with the RefSeq and GenBank genomic loci codes of the 897 genes described in the main text, respectively.
+- `affected_newformat` and `affected_oldformat` are R vectors, stored as binary files, with the RefSeq and GenBank genomic loci codes of the 897 shifted genes described in the main text, respectively.
 - `genbank_processed.RDS` and `refseq_processed.RDS` are the final expression datasets processed using GenBank and RefSeq annotations as references. More conveniently provided as text files in the supplemental material of the manuscript.
 - `prepare-loci-info.R`, `process-rsem.R` are scripts for parsing RSEM output files and running them through DESeq2 for differential expression analysis.
 - `figures.R`and `plot_utils.R` are scripts for generating the figures present in the final manuscript.
