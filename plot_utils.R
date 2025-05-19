@@ -23,13 +23,13 @@ scatterPlot <- function(cond.choose) {
     geom_vline(xintercept = 0, color = "grey70") +
     geom_hline(yintercept = 0, color = "grey70") +
     geom_point(size = 2, alpha = 1) +
-   ggrepel::geom_text_repel(data = unshifted_large_variations, aes(label = locus_tag), color = "black", force_pull = 0.3) +
+   ggrepel::geom_text_repel(data = unshifted_large_variations, aes(label = locus_tag), color = "black", force_pull = 0.3, size = 4.5) +
     scale_color_manual(name = "",
                        labels = c("Same position in both annotations", "Shifted genes"),
                        values = c( "TRUE" = "steelblue", "FALSE" = "grey"))+
     guides(color = guide_legend(override.aes = list(size=5))) +
     labs(subtitle = caption, y = "RefSeq Log2 Fold Change", x = "GenBank Log2 Fold Change") +
-    theme_light(base_size = 14) +
+    theme_light(base_size = 16) +
     theme(
       panel.border = element_rect(color = NA),
       panel.grid.minor = element_blank(),
@@ -40,10 +40,10 @@ scatterPlot <- function(cond.choose) {
       legend.background = element_blank(),
       legend.position.inside = c(0.3, 0.9),
       legend.title = element_blank(),
-      legend.text = element_text(color = "black", size = 12),
+      legend.text = element_text(color = "black", size = 14),
 
       axis.ticks = element_blank(),
-      axis.text = element_text(color = "black", size = 14)
+      axis.text = element_text(color = "black", size = 16)
     )
 }
 
