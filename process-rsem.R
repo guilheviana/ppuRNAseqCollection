@@ -151,7 +151,7 @@ if (file.exists("./output/unique_conditions_MANUALFORMATTED.csv")) {
     dplyr::relocate(dataset, condition_formatted, locus_tag, baseMean, log2FoldChange,
                     lfcSE, stat, pvalue, padj, condition, control, transcript, Source)
 
-  readr::write_tsv(genbank_processed, "../output/tables/genbank_rnaseq.tsv")
+  readr::write_tsv(genbank_processed, "genbank_processed.tsv")
   saveRDS(genbank_processed, "genbank_processed.RDS")
 
   refseq_processed <- refseq_processed |>
@@ -159,7 +159,7 @@ if (file.exists("./output/unique_conditions_MANUALFORMATTED.csv")) {
     dplyr::relocate(dataset, condition_formatted, new_locus_tag, old_locus_tag, baseMean, log2FoldChange,
                     lfcSE, stat, pvalue, padj, condition, control, transcript, Source)
 
-  readr::write_tsv(refseq_processed, "../output/tables/refseq_rnaseq.tsv")
+  readr::write_tsv(refseq_processed, "refseq_processed.tsv")
   saveRDS(refseq_processed, "refseq_processed.RDS")
 
 } else {
